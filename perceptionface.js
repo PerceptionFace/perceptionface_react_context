@@ -5,7 +5,7 @@ import {
     MetamaskNotConnectedError,
     NFTAlreadyMintedError,
 } from "/errors";
-import {abi} from "./contract"
+import {abi} from "./contract";
 import {ethers} from "ethers";
 import axios from "axios";
 import {useMoralis} from "react-moralis";
@@ -32,7 +32,7 @@ const defaultState = {
     },
 };
 const PerceptionFaceContext = React.createContext(defaultState);
-PerceptionFaceContext.displayName = "MysteryBoxContext";
+PerceptionFaceContext.displayName = "PerceptionFaceContext";
 
 export const PerceptionFaceProvider = ({children, address, chain}) => {
     const {ethereum} = typeof window !== "undefined" ? window : {};
@@ -67,7 +67,7 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
 
     const updateUser = async (email, fullname, profile) => {
         if (isAuthenticated && user) {
-            await user.setEmail(email);
+            user.setEmail(email);
             await user.set("fullname", fullname);
             await user.set("profile", profile);
             return user.save();
