@@ -5,6 +5,10 @@ This is the official React Context API of Perception Face processes. With this c
 - Moralis
 
 ## How use it
+Install via npm
+```shell
+npm install --save https://github.com/PerceptionFace/perceptionface_react_context
+```
 
 Import PerceptionFace and Moralis context
 ```js
