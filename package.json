@@ -1,0 +1,31 @@
+{
+  "name": "@perceptionface/perceptionface_react_context",
+  "version": "0.0.1",
+  "description": "Perception Face React Context",
+  "main": "perceptionface.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PerceptionFace/perceptionface_react_context.git"
+  },
+  "keywords": [
+    "perceptionface",
+    "react",
+    "context"
+  ],
+  "author": "perceptionface",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PerceptionFace/perceptionface_react_context/issues"
+  },
+  "homepage": "https://github.com/PerceptionFace/perceptionface_react_context#readme",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "ethers": "^5.6.4",
+    "moralis": "^1.5.9",
+    "react": "^18.0.0",
+    "react-moralis": "^1.3.5"
+  }
+}
