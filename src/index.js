@@ -1,14 +1,10 @@
-import * as React from "react";
-import Moralis from "moralis";
-import {
-    InsufficientFoundsError,
-    MetamaskNotConnectedError,
-    NFTAlreadyMintedError,
-} from "/errors";
-import {abi} from "./contract";
-import {ethers} from "ethers";
-import axios from "axios";
-import {useMoralis} from "react-moralis";
+import * as React from 'react';
+import Moralis from 'moralis';
+import { InsufficientFoundsError, MetamaskNotConnectedError, NFTAlreadyMintedError } from './utils/errors';
+import { abi } from './utils/contract';
+import { ethers } from 'ethers';
+import axios from 'axios';
+import { useMoralis } from 'react-moralis';
 
 const defaultState = {
     user: {},
@@ -22,20 +18,16 @@ const defaultState = {
     isNFTMinting: false,
     nftData: {},
     userNFTs: [],
-    updateUser: () => {
-    },
-    connect: () => {
-    },
-    getRandomNFT: () => {
-    },
-    disconnect: () => {
-    },
+    updateUser: () => {},
+    connect: () => {},
+    getRandomNFT: () => {},
+    disconnect: () => {},
 };
 const PerceptionFaceContext = React.createContext(defaultState);
-PerceptionFaceContext.displayName = "PerceptionFaceContext";
+PerceptionFaceContext.displayName = 'PerceptionFaceContext';
 
-export const PerceptionFaceProvider = ({children, address, chain}) => {
-    const {ethereum} = typeof window !== "undefined" ? window : {};
+const PerceptionFaceProvider = ({ children, address, chain }) => {
+    const { ethereum } = typeof window !== 'undefined' ? window : {};
     const [currentAccount, setCurrentAccount] = React.useState(null);
     const [nftPrice, setNftPrice] = React.useState(null);
     const [isMysteryBoxDisabled, setMysteryBoxDisabled] = React.useState(true);
@@ -43,23 +35,23 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
     const [isNFTMinting, setNFTMinting] = React.useState(false);
     const [nftData, setNftData] = React.useState(null);
     const [userNFTs, setUserNFTs] = React.useState([]);
-    const {authenticate, isAuthenticated, isAuthenticating, user, account, logout, isInitialized} = useMoralis();
+    const { authenticate, isAuthenticated, isAuthenticating, user, account, logout, isInitialized } = useMoralis();
 
     // // Get Address from Metamask
     const getEthAccount = async () => {
         if (isAuthenticated && user) {
-            setCurrentAccount(user.get("ethAddress"));
+            setCurrentAccount(user.get('ethAddress'));
         }
     };
 
     // Authenticate User in Moralis
     const connect = async () => {
         if (!isAuthenticated) {
-            await authenticate({signingMessage: "Connect to Perception Face"})
-                .then(function (user) {
-                    setCurrentAccount(user.get("ethAddress"));
+            await authenticate({ signingMessage: 'Connect to Perception Face' })
+                .then((user) => {
+                    setCurrentAccount(user.get('ethAddress'));
                 })
-                .catch(function (error) {
+                .catch((error) => {
                     console.log(error);
                 });
         }
@@ -68,8 +60,9 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
     const updateUser = async (email, fullname, profile) => {
         if (isAuthenticated && user) {
             user.setEmail(email);
-            await user.set("fullname", fullname);
-            await user.set("profile", profile);
+            await user.set('fullname', fullname);
+            await user.set('profile', profile);
+
             return user.save();
         }
     };
@@ -84,18 +77,14 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
             if (ethereum) {
                 // Conecto al contrato
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
-                let contract = new ethers.Contract(
-                    address,
-                    abi,
-                    provider,
-                );
+                let contract = new ethers.Contract(address, abi, provider);
                 // Obtengo el precio de tarifa
                 const gweiValue = await contract.fee();
                 let etherValue = ethers.utils.formatEther(gweiValue);
-                const sendValue = ethers.utils.parseUnits(etherValue, "ether");
+                const sendValue = ethers.utils.parseUnits(etherValue, 'ether');
                 setNftPrice(sendValue);
             } else {
-                console.log("No hay conexion a Metamask");
+                console.log('No hay conexion a Metamask');
             }
         } catch (error) {
             console.log(error);
@@ -105,12 +94,12 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
     const initMysteryBox = async () => {
         setMysteryBoxLoading(true);
         setMysteryBoxDisabled(true);
-        await Moralis.Cloud.run("AnyUnmintedNft")
-            .then(response => {
+        await Moralis.Cloud.run('AnyUnmintedNft')
+            .then((response) => {
                 setMysteryBoxLoading(false);
                 setMysteryBoxDisabled(!response);
             })
-            .catch(error => console.log(error));
+            .catch((error) => console.log(error));
     };
 
     const getRandomNFT = async () => {
@@ -123,12 +112,12 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
             setMysteryBoxLoading(true);
             setNFTMinting(true);
             let myNFT = null;
-            await Moralis.Cloud.run("GetRandomNft")
-                .then(response => myNFT = response)
-                .catch(e => console.log(e));
+            await Moralis.Cloud.run('GetRandomNft')
+                .then((response) => (myNFT = response))
+                .catch((e) => console.log(e));
             await mintNFT(myNFT);
         } else {
-            console.error("NFT minting in process");
+            console.error('NFT minting in process');
         }
     };
 
@@ -140,10 +129,10 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
                 // Instancia el contrato
                 let contract = new ethers.Contract(address, abi, signer);
                 // Llama a la funcion redeem
-                await contract.redeem(nft.json, nft.creator, nft.signature, nft.moralisId, {value: nftPrice});
+                await contract.redeem(nft.json, nft.creator, nft.signature, nft.moralisId, { value: nftPrice });
                 await getNftInfo(nft.json);
             } else {
-                console.error("Metamask is not connected");
+                console.error('Metamask is not connected');
             }
         } catch (error) {
             setMysteryBoxDisabled(false);
@@ -152,15 +141,15 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
             console.log(error);
             // Comprueba qué fue lo que causo el error
             if (!currentAccount) {
-                throw new MetamaskNotConnectedError("User not connected");
+                throw new MetamaskNotConnectedError('User not connected');
             }
             // Si fue falta de fondos (code = -32000) abre el onramper
             else if (error.data.code === -32000) {
-                throw new InsufficientFoundsError("Insufficient Founds");
+                throw new InsufficientFoundsError('Insufficient Founds');
             }
             // Si fue porque ya esta minteado (por ahora) abre un alert que avisa
             else if (error.data.code === 3) {
-                throw new NFTAlreadyMintedError("NFT Already Minted");
+                throw new NFTAlreadyMintedError('NFT Already Minted');
             }
         }
     };
@@ -170,23 +159,23 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
         const signer = provider.getSigner();
         let contract = new ethers.Contract(address, abi, signer);
         const myAddress = await signer.getAddress();
-        let filter = contract.filters.eventMint(
-            myAddress,
-            null,
-        );
+        let filter = contract.filters.eventMint(myAddress, null);
         // EVENTO
         contract.on(filter, async () => {
             await initMysteryBox();
             // Obtengo los datos para despues mostrar el nft
-            axios.get(_nftJson).then(response => {
-                console.log("NFT Data", response.data);
-                setNftData(response.data);
-                setMysteryBoxDisabled(false);
-                setMysteryBoxLoading(false);
-                setNFTMinting(false);
-                initMysteryBox();
-                getUserNFTS();
-            }).catch(error => console.log(error));
+            axios
+                .get(_nftJson)
+                .then((response) => {
+                    console.log('NFT Data', response.data);
+                    setNftData(response.data);
+                    setMysteryBoxDisabled(false);
+                    setMysteryBoxLoading(false);
+                    setNFTMinting(false);
+                    initMysteryBox();
+                    getUserNFTS();
+                })
+                .catch((error) => console.log(error));
         });
     };
 
@@ -198,19 +187,18 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
             });
             const nftsReduced = nfts.result.reduce((filtered, nft) => {
                 if (nft.metadata) {
-                    filtered.push(
-                        {
-                            id: nft.token_id,
-                            name: nft.name,
-                            uri: nft.token_uri,
-                            hash: nft.token_hash,
-                            address: nft.token_address,
-                            contract_type: nft.contract_type,
-                            amount: nft.amount,
-                            metadata: JSON.parse(nft.metadata),
-                        },
-                    );
+                    filtered.push({
+                        id: nft.token_id,
+                        name: nft.name,
+                        uri: nft.token_uri,
+                        hash: nft.token_hash,
+                        address: nft.token_address,
+                        contract_type: nft.contract_type,
+                        amount: nft.amount,
+                        metadata: JSON.parse(nft.metadata),
+                    });
                 }
+
                 return filtered;
             }, []);
             setUserNFTs(nftsReduced);
@@ -232,8 +220,8 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
     }, [currentAccount]);
 
     return (
-        <PerceptionFaceContext.Provider value={
-            {
+        <PerceptionFaceContext.Provider
+            value={{
                 user,
                 currentAccount,
                 isAuthenticated,
@@ -248,7 +236,8 @@ export const PerceptionFaceProvider = ({children, address, chain}) => {
                 nftData,
                 getRandomNFT,
                 userNFTs,
-            }}>
+            }}
+        >
             {children}
         </PerceptionFaceContext.Provider>
     );
